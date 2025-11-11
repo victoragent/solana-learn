@@ -5,6 +5,7 @@ use std::io::{Write, BufWriter};
 use std::sync::{Arc, Mutex, mpsc};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::thread;
+use std::env;
 
 const MAX_LINES_PER_FILE: u64 = 1_000_000;
 
@@ -89,12 +90,79 @@ impl LogWriter {
     }
 }
 
+fn parse_args() -> Result<Option<usize>, String> {
+    let args: Vec<String> = env::args().collect();
+    
+    for i in 0..args.len() {
+        if args[i] == "--threads" || args[i] == "-t" {
+            if i + 1 < args.len() {
+                if let Ok(num) = args[i + 1].parse::<usize>() {
+                    return Ok(Some(num));
+                } else {
+                    return Err(format!("错误: '{}' 不是有效的线程数", args[i + 1]));
+                }
+            } else {
+                return Err(format!("错误: {} 参数需要指定线程数", args[i]));
+            }
+        }
+    }
+    
+    Ok(None)
+}
+
+fn print_usage() {
+    println!("用法:");
+    println!("  cargo run [--release] -- [选项]");
+    println!();
+    println!("选项:");
+    println!("  --threads, -t <数量>    指定使用的工作线程数（默认为CPU核心数）");
+    println!();
+    println!("示例:");
+    println!("  cargo run -- --threads 8");
+    println!("  cargo run --release -- -t 16");
+}
+
 fn main() -> std::io::Result<()> {
+    // 检查是否有 --help 或 -h
+    let args: Vec<String> = env::args().collect();
+    if args.iter().any(|arg| arg == "--help" || arg == "-h") {
+        print_usage();
+        std::process::exit(0);
+    }
+    
+    // 解析命令行参数
+    let num_threads = match parse_args() {
+        Ok(Some(num)) => {
+            if num == 0 {
+                eprintln!("错误: 线程数必须大于 0");
+                print_usage();
+                std::process::exit(1);
+            }
+            let max_cores = num_cpus::get();
+            if num > max_cores * 2 {
+                eprintln!("警告: 指定的线程数 {} 超过建议值（CPU核心数的2倍: {}），可能会影响性能", num, max_cores * 2);
+            }
+            num
+        }
+        Ok(None) => {
+            // 默认使用CPU核心数
+            num_cpus::get()
+        }
+        Err(err) => {
+            eprintln!("{}", err);
+            print_usage();
+            std::process::exit(1);
+        }
+    };
+    
+    let max_cores = num_cpus::get();
     let target_prefix = "seekr";
     
-    // 获取CPU核心数，创建相应数量的工作线程
-    let num_threads = num_cpus::get();
-    println!("检测到 {} 个CPU核心，将使用 {} 个工作线程", num_threads, num_threads);
+    if num_threads == max_cores {
+        println!("检测到 {} 个CPU核心，将使用 {} 个工作线程（默认）", max_cores, num_threads);
+    } else {
+        println!("检测到 {} 个CPU核心，将使用 {} 个工作线程（用户指定）", max_cores, num_threads);
+    }
     
     println!("开始生成密钥对，寻找以 '{}' 开头的公钥地址...\n", target_prefix);
     println!("日志将保存到 keypairs_XXXX.log 文件中，每个文件最多 {} 行\n", MAX_LINES_PER_FILE);

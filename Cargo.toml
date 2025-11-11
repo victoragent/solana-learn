@@ -7,4 +7,5 @@ edition = "2021"
 solana-sdk = "3.0.0"
 bs58 = "0.5"
 chrono = "0.4"
+num_cpus = "1.0"
 

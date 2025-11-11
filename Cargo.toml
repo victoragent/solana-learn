@@ -1,0 +1,10 @@
+[package]
+name = "solana-learn"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+solana-sdk = "3.0.0"
+bs58 = "0.5"
+chrono = "0.4"
+

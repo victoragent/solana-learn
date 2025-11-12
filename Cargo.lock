@@ -1342,16 +1342,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "solana-learn"
-version = "0.1.0"
-dependencies = [
- "bs58",
- "chrono",
- "num_cpus",
- "solana-sdk",
-]
-
-[[package]]
 name = "solana-message"
 version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1872,6 +1862,16 @@ dependencies = [
  "serde_derive",
  "solana-instruction-error",
  "solana-sanitize",
+]
+
+[[package]]
+name = "solana-vanity-generator"
+version = "0.1.0"
+dependencies = [
+ "bs58",
+ "chrono",
+ "num_cpus",
+ "solana-sdk",
 ]
 
 [[package]]

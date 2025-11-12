@@ -44,13 +44,13 @@ cargo run --release
 cargo run --release -- seekr
 
 # 搜索多个前缀（最简单的方式）
-cargo run --release -- win wxy see
+cargo run --release -- name1 name2 name3
 
 # 使用 --prefix 参数
-cargo run --release -- --prefix win --prefix wxy --prefix see
+cargo run --release -- --prefix name1 --prefix name2 --prefix name3
 
 # 使用短参数 -p
-cargo run --release -- -p win -p wxy -p see
+cargo run --release -- -p name1 -p name2 -p name3
 ```
 
 ### 指定线程数
@@ -60,7 +60,7 @@ cargo run --release -- -p win -p wxy -p see
 cargo run --release -- --threads 8 --prefix seekr
 
 # 使用短参数 -t
-cargo run --release -- -t 16 win wxy see
+cargo run --release -- -t 16 name1 name2 name3
 ```
 
 ### 查看帮助
